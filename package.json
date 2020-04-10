@@ -21,6 +21,7 @@
   "homepage": "https://github.com/TheMightyRaider/slink-frontend#readme",
   "devDependencies": {
     "@babel/core": "^7.9.0",
+    "@babel/plugin-proposal-class-properties": "^7.8.3",
     "@babel/preset-env": "^7.9.5",
     "@babel/preset-react": "^7.9.4",
     "babel-loader": "^8.1.0",
