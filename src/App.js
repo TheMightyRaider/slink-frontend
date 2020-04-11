@@ -1,10 +1,12 @@
 import React from "react";
 import DisplayShortenedLink from "./Components/DisplayShortenedLink";
 import DisplayStoredLinks from "./Components/DisplayStoredLinks";
+import "./app.css";
 
 class App extends React.Component {
   state = {
     value: "",
+    receivedShortedLink: false,
     shortedLink: "",
     storedLinks: [],
   };
@@ -18,12 +20,16 @@ class App extends React.Component {
   submitTheLink = (e) => {
     this.setState({
       shortedLink: "gotit",
+      receivedShortedLink: true,
     });
   };
 
   fetchStoredLinks = () => {
     this.setState({
       storedLinks: [
+        1,
+        2,
+        3,
         /*Gets Items from the API*/
       ],
     });
@@ -36,17 +42,41 @@ class App extends React.Component {
           type="text"
           value={this.state.value}
           onChange={this.updateValue}
+          className={
+            this.state.receivedShortedLink ? "hideInput" : "enableInput"
+          }
         ></input>
-        <button name="submit" onClick={this.submitTheLink}>
+        <button
+          name="submit"
+          onClick={this.submitTheLink}
+          className={
+            this.state.receivedShortedLink ? "hideInput" : "enableInput"
+          }
+        >
           Submit
         </button>
-        <button name="getLinks" onClick={this.fetchStoredLinks}>
+        <button
+          name="getLinks"
+          onClick={this.fetchStoredLinks}
+          className={
+            this.state.receivedShortedLink ? "hideInput" : "enableInput"
+          }
+        >
           Get Stored Links
         </button>
-        {this.state.shortedLink.length > 0 ? (
-          <DisplayStoredLinks links={this.state.shortedLink} />
+        {this.state.receivedShortedLink ? (
+          <DisplayShortenedLink
+            link={this.state.shortedLink}
+            updateReceivedLink={() => {
+              console.log("clicked");
+              this.setState({ receivedShortedLink: false });
+            }}
+          />
         ) : null}
-        <DisplayShortenedLink link={this.state.shortedLink} />
+
+        {this.state.storedLinks.length > 0 ? (
+          <DisplayStoredLinks links={this.state.storedLinks} />
+        ) : null}
       </div>
     );
   }
