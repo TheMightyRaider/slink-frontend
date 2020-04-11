@@ -1,10 +1,12 @@
 import React from "react";
 import DisplayShortenedLink from "./Components/DisplayShortenedLink";
+import DisplayStoredLinks from "./Components/DisplayStoredLinks";
 
 class App extends React.Component {
   state = {
     value: "",
     shortedLink: "",
+    storedLinks: [],
   };
 
   updateValue = (e) => {
@@ -19,6 +21,14 @@ class App extends React.Component {
     });
   };
 
+  fetchStoredLinks = () => {
+    this.setState({
+      storedLinks: [
+        /*Gets Items from the API*/
+      ],
+    });
+  };
+
   render() {
     return (
       <div>
@@ -30,6 +40,12 @@ class App extends React.Component {
         <button name="submit" onClick={this.submitTheLink}>
           Submit
         </button>
+        <button name="getLinks" onClick={this.fetchStoredLinks}>
+          Get Stored Links
+        </button>
+        {this.state.shortedLink.length > 0 ? (
+          <DisplayStoredLinks links={this.state.shortedLink} />
+        ) : null}
         <DisplayShortenedLink link={this.state.shortedLink} />
       </div>
     );
