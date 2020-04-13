@@ -1,16 +1,28 @@
 import React from "react";
+import Link from "./Link";
+import "../app.css";
 
 class DisplayStoredLinks extends React.Component {
   render() {
     return (
       <div>
-        {this.props.links.map((item) => {
-          return (
-            <div>
-              <h1>{item}</h1>
-            </div>
-          );
-        })}
+        <table>
+          <tbody>
+            <tr>
+              <th>Shortened Link</th>
+              <th>OrginalUrl</th>
+            </tr>
+            {this.props.links.map((item, index) => {
+              return (
+                <Link
+                  key={this.props.id + index}
+                  hash={item.hash}
+                  originalUrl={item.url}
+                />
+              );
+            })}
+          </tbody>
+        </table>
       </div>
     );
   }

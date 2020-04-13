@@ -14,15 +14,15 @@ class App extends React.Component {
   };
 
   componentDidMount() {
+    let newUserId;
     let userID = parseInt(localStorage.getItem("ID"));
-    if (userID) {
-      this.setState({
-        userID,
-      });
-    } else {
-      let newUserId = new Date().getTime();
+    if (!userID) {
+      newUserId = new Date().getTime();
       localStorage.setItem("ID", newUserId);
     }
+    this.setState({
+      userID: newUserId || userID,
+    });
   }
 
   updateValue = (e) => {
@@ -43,21 +43,25 @@ class App extends React.Component {
     );
 
     this.setState({
+      value: "",
       receivedShortedLink: true,
       displayStoredShortenedLink: false,
-      shortedLink: shortenLink.data.data.slink,
+      shortedLink: [...shortenLink.data.data.slink],
     });
   };
 
-  fetchStoredLinks = () => {
+  fetchStoredLinks = async () => {
+    const params = {
+      user: 12345,
+    };
+    const storedLinks = await axios.get(
+      "https://cors-anywhere.herokuapp.com/http://slink-staging.herokuapp.com/api/links",
+      { params }
+    );
+    console.log(storedLinks.data.data);
     this.setState({
       displayStoredShortenedLink: true,
-      storedLinks: [
-        1,
-        2,
-        3,
-        /*Gets Items from the API*/
-      ],
+      storedLinks: [...storedLinks.data.data],
     });
   };
 
@@ -90,6 +94,8 @@ class App extends React.Component {
         >
           Get Stored Links
         </button>
+        <br></br>
+        <br></br>
         {this.state.receivedShortedLink ? (
           <DisplayShortenedLink
             link={this.state.shortedLink}
@@ -102,7 +108,10 @@ class App extends React.Component {
 
         {this.state.storedLinks.length > 0 &&
         this.state.displayStoredShortenedLink ? (
-          <DisplayStoredLinks links={this.state.storedLinks} />
+          <DisplayStoredLinks
+            links={this.state.storedLinks}
+            id={this.state.userID}
+          />
         ) : null}
       </div>
     );
