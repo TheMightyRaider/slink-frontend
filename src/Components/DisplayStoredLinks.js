@@ -9,8 +9,8 @@ class DisplayStoredLinks extends React.Component {
         <table>
           <tbody>
             <tr>
-              <th>Shortened Link</th>
-              <th>OrginalUrl</th>
+              <th>Original Url</th>
+              <th>Shortened Url</th>
             </tr>
             {this.props.links.map((item, index) => {
               return (

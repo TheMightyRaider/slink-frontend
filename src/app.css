@@ -1,5 +1,5 @@
 body {
-  background-color: grey;
+  background-color: snow;
 }
 
 .hideInput {
@@ -19,4 +19,5 @@ th,
 td {
   border: 1px solid black;
   padding: 5px;
+  background-color: honeydew;
 }

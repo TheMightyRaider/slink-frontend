@@ -7,11 +7,27 @@ import "./app.css";
 class App extends React.Component {
   state = {
     value: "",
+    randomColor: null,
     receivedShortedLink: false,
     displayStoredShortenedLink: false,
     shortedLink: "",
     storedLinks: [],
   };
+
+  wait(ms) {
+    return new Promise((resolve) => {
+      setTimeout(resolve, ms * 1000);
+    });
+  }
+
+  generateRandomColor(generate = true) {
+    if (generate) {
+      const randomColor = Math.floor(Math.random() * 16777215).toString(16);
+      document.body.style.backgroundColor = "#" + randomColor;
+    } else {
+      document.body.style.backgroundColor = "";
+    }
+  }
 
   componentDidMount() {
     let newUserId;
@@ -32,37 +48,59 @@ class App extends React.Component {
   };
 
   submitTheLink = async (e) => {
+    const randomColorValue = setInterval(this.generateRandomColor, 10);
+
     const params = {
       url: this.state.value,
       user: 12345,
     };
 
-    const shortenLink = await axios.put(
-      "https://cors-anywhere.herokuapp.com/http://slink-staging.herokuapp.com/api/links",
-      params
-    );
-
-    this.setState({
-      value: "",
-      receivedShortedLink: true,
-      displayStoredShortenedLink: false,
-      shortedLink: [...shortenLink.data.data.slink],
-    });
+    await axios
+      .put(
+        "https://cors-anywhere.herokuapp.com/http://slink-staging.herokuapp.com/api/links",
+        params
+      )
+      .then((response) => {
+        clearInterval(randomColorValue);
+        this.generateRandomColor(false);
+        this.setState({
+          value: "",
+          receivedShortedLink: true,
+          displayStoredShortenedLink: false,
+          shortedLink: [...response.data.data.slink],
+        });
+      })
+      .catch((err) => {
+        this.setState({
+          receivedShortedLink: false,
+        });
+        clearInterval(randomColorValue);
+        this.generateRandomColor(false);
+        console.log(err);
+      });
   };
 
   fetchStoredLinks = async () => {
+    const randomBackground = setInterval(this.generateRandomColor, 10);
+
     const params = {
       user: 12345,
     };
-    const storedLinks = await axios.get(
-      "https://cors-anywhere.herokuapp.com/http://slink-staging.herokuapp.com/api/links",
-      { params }
-    );
-    console.log(storedLinks.data.data);
-    this.setState({
-      displayStoredShortenedLink: true,
-      storedLinks: [...storedLinks.data.data],
-    });
+    await axios
+      .get("http://slink-staging.herokuapp.com/api/links", { params })
+      .then((response) => {
+        clearInterval(randomBackground);
+        this.generateRandomColor(false);
+        this.setState({
+          displayStoredShortenedLink: true,
+          storedLinks: [...response.data.data],
+        });
+      })
+      .catch((err) => {
+        clearInterval(randomBackground);
+        this.generateRandomColor(false);
+        console.log(err);
+      });
   };
 
   render() {
