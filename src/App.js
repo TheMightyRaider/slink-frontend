@@ -7,25 +7,23 @@ import "./app.css";
 class App extends React.Component {
   state = {
     value: "",
+    error: null,
+    loading: false,
     randomColor: null,
-    receivedShortedLink: false,
+    receivedShortenedLink: false,
     displayStoredShortenedLink: false,
     shortedLink: "",
     storedLinks: [],
   };
 
-  wait(ms) {
-    return new Promise((resolve) => {
-      setTimeout(resolve, ms * 1000);
-    });
-  }
-
   generateRandomColor(generate = true) {
     if (generate) {
       const randomColor = Math.floor(Math.random() * 16777215).toString(16);
       document.body.style.backgroundColor = "#" + randomColor;
+      document.body.style.backgroundImage = "none";
     } else {
       document.body.style.backgroundColor = "";
+      document.body.style.backgroundImage = "";
     }
   }
 
@@ -33,7 +31,7 @@ class App extends React.Component {
     let newUserId;
     let userID = parseInt(localStorage.getItem("ID"));
     if (!userID) {
-      newUserId = new Date().getTime();
+      newUserId = Math.floor(new Date().getTime() / 1000);
       localStorage.setItem("ID", newUserId);
     }
     this.setState({
@@ -50,29 +48,34 @@ class App extends React.Component {
   submitTheLink = async (e) => {
     const randomColorValue = setInterval(this.generateRandomColor, 10);
 
+    this.setState({
+      loading: true,
+    });
+
     const params = {
       url: this.state.value,
-      user: 12345,
+      user: this.state.userID,
     };
 
     await axios
-      .put(
-        "https://cors-anywhere.herokuapp.com/http://slink-staging.herokuapp.com/api/links",
-        params
-      )
+      .put("https://slink-staging.herokuapp.com/api/links", params)
       .then((response) => {
         clearInterval(randomColorValue);
         this.generateRandomColor(false);
         this.setState({
           value: "",
-          receivedShortedLink: true,
+          error: false,
+          loading: false,
+          receivedShortenedLink: true,
           displayStoredShortenedLink: false,
           shortedLink: [...response.data.data.slink],
         });
       })
       .catch((err) => {
         this.setState({
-          receivedShortedLink: false,
+          error: true,
+          loading: false,
+          displayStoredShortenedLink: false, // Hiding the storedURL details, Happens  When the user has first requests storedURL and then request for a new shortenedURL.
         });
         clearInterval(randomColorValue);
         this.generateRandomColor(false);
@@ -82,9 +85,11 @@ class App extends React.Component {
 
   fetchStoredLinks = async () => {
     const randomBackground = setInterval(this.generateRandomColor, 10);
-
+    this.setState({
+      loading: true,
+    });
     const params = {
-      user: 12345,
+      user: this.state.userID,
     };
     await axios
       .get("http://slink-staging.herokuapp.com/api/links", { params })
@@ -92,11 +97,16 @@ class App extends React.Component {
         clearInterval(randomBackground);
         this.generateRandomColor(false);
         this.setState({
+          loading: false,
           displayStoredShortenedLink: true,
           storedLinks: [...response.data.data],
         });
       })
       .catch((err) => {
+        this.setState({
+          loading: false,
+          error: true,
+        });
         clearInterval(randomBackground);
         this.generateRandomColor(false);
         console.log(err);
@@ -106,46 +116,75 @@ class App extends React.Component {
   render() {
     return (
       <div>
-        <input
-          type="text"
-          value={this.state.value}
-          onChange={this.updateValue}
+        <div
           className={
-            this.state.receivedShortedLink ? "hideInput" : "enableInput"
-          }
-        ></input>
-        <button
-          name="submit"
-          onClick={this.submitTheLink}
-          className={
-            this.state.receivedShortedLink ? "hideInput" : "enableInput"
+            !this.state.loading && this.state.displayStoredShortenedLink
+              ? "afterStoredLinkIsDisplayed"
+              : "hideInput"
           }
         >
-          Submit
-        </button>
-        <button
-          name="getLinks"
-          onClick={this.fetchStoredLinks}
+          <h3>Shorten a New Link?</h3>
+          <input
+            type="text"
+            value={this.state.value}
+            onChange={this.updateValue}
+          ></input>
+
+          <button name="submit" onClick={this.submitTheLink}>
+            Submit
+          </button>
+        </div>
+        <div
           className={
-            this.state.receivedShortedLink ? "hideInput" : "enableInput"
+            this.state.error ||
+            this.state.displayStoredShortenedLink ||
+            this.state.receivedShortenedLink ||
+            this.state.loading
+              ? "hideInput"
+              : "inputBox"
           }
         >
-          Get Stored Links
-        </button>
+          <input
+            type="text"
+            value={this.state.value}
+            onChange={this.updateValue}
+          ></input>{" "}
+          <button name="submit" onClick={this.submitTheLink}>
+            Submit
+          </button>
+          <br></br>
+          <br></br>
+          <span>Want your previous shortened Links? </span>
+          <button name="getLinks" onClick={this.fetchStoredLinks}>
+            Click here
+          </button>
+        </div>
         <br></br>
         <br></br>
-        {this.state.receivedShortedLink ? (
+        <div className={this.state.error ? "displayError" : "hideInput"}>
+          <h3>Sorry Bruh, An Error has occurred :(</h3>
+          <button
+            name="tryAgain"
+            onClick={() => {
+              this.setState({ value: "", error: false });
+            }}
+          >
+            Try Again
+          </button>
+        </div>
+
+        {this.state.receivedShortenedLink ? (
           <DisplayShortenedLink
             link={this.state.shortedLink}
             updateReceivedLink={() => {
-              console.log("clicked");
-              this.setState({ receivedShortedLink: false });
+              this.setState({ error: false, receivedShortenedLink: false });
             }}
           />
         ) : null}
 
         {this.state.storedLinks.length > 0 &&
-        this.state.displayStoredShortenedLink ? (
+        this.state.displayStoredShortenedLink &&
+        !this.state.loading ? (
           <DisplayStoredLinks
             links={this.state.storedLinks}
             id={this.state.userID}
