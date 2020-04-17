@@ -22,15 +22,15 @@ class App extends React.Component {
     storedLinks: [],
   };
 
-  generateRandomColor(generate = true) {
-    if (generate) {
-      const randomColor = Math.floor(Math.random() * 16777215).toString(16);
-      document.body.style.backgroundColor = "#" + randomColor;
-      document.body.style.backgroundImage = "none";
-    } else {
-      document.body.style.backgroundColor = "";
-      document.body.style.backgroundImage = "";
-    }
+  generateRandomColor() {
+    const randomColor = Math.floor(Math.random() * 16777215).toString(16);
+    document.body.style.backgroundColor = "#" + randomColor;
+    document.body.style.backgroundImage = "none";
+  }
+
+  clearBackgroundColor() {
+    document.body.style.backgroundColor = "";
+    document.body.style.backgroundImage = "";
   }
 
   componentDidMount() {
@@ -52,7 +52,7 @@ class App extends React.Component {
   };
 
   submitTheLink = async (e) => {
-    if (e.which == "13" || e.type == "click") {
+    if ((e.which == "13" || e.type == "click") && this.state.value.length > 0) {
       const randomColorValue = setInterval(this.generateRandomColor, 10);
       this.setState({
         loading: true,
@@ -67,7 +67,7 @@ class App extends React.Component {
         .put("https://slink-staging.herokuapp.com/api/links", params)
         .then((response) => {
           clearInterval(randomColorValue);
-          this.generateRandomColor(false);
+          this.clearBackgroundColor();
           this.setState({
             value: "",
             error: false,
@@ -89,7 +89,7 @@ class App extends React.Component {
             displayStoredShortenedLink: false, // Hiding the storedURL details, Happens  When the user has first requests storedURL and then request for a new shortenedURL.
           });
           clearInterval(randomColorValue);
-          this.generateRandomColor(false);
+          this.clearBackgroundColor();
         });
     }
   };
@@ -104,10 +104,10 @@ class App extends React.Component {
       user: this.state.userID,
     };
     await axios
-      .get("http://slink-staging.herokuapp.com/api/links", { params })
+      .get("https://slink-staging.herokuapp.com/api/links", { params })
       .then((response) => {
         clearInterval(randomBackground);
-        this.generateRandomColor(false);
+        this.clearBackgroundColor();
         this.setState({
           loading: false,
           displayStoredShortenedLink: true,
@@ -120,7 +120,7 @@ class App extends React.Component {
           error: true,
         });
         clearInterval(randomBackground);
-        this.generateRandomColor(false);
+        this.clearBackgroundColor();
       });
   };
 
