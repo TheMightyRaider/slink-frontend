@@ -4,6 +4,11 @@ import DisplayShortenedLink from "./Components/DisplayShortenedLink";
 import DisplayStoredLinks from "./Components/DisplayStoredLinks";
 import "./app.css";
 
+/* 
+
+  Add keypress validation submit !
+
+*/
 class App extends React.Component {
   state = {
     value: "",
@@ -47,46 +52,46 @@ class App extends React.Component {
   };
 
   submitTheLink = async (e) => {
-    const randomColorValue = setInterval(this.generateRandomColor, 10);
-
-    this.setState({
-      loading: true,
-    });
-
-    const params = {
-      url: this.state.value,
-      user: this.state.userID,
-    };
-
-    await axios
-      .put("https://slink-staging.herokuapp.com/api/links", params)
-      .then((response) => {
-        clearInterval(randomColorValue);
-        this.generateRandomColor(false);
-        this.setState({
-          value: "",
-          error: false,
-          loading: false,
-          receivedShortenedLink: true,
-          displayStoredShortenedLink: false,
-          shortedLink: [...response.data.data.slink],
-        });
-      })
-      .catch((error) => {
-        if (error.response) {
-          this.setState({
-            errorDetails: error.response.data.error,
-          });
-        }
-        this.setState({
-          error: true,
-          loading: false,
-          displayStoredShortenedLink: false, // Hiding the storedURL details, Happens  When the user has first requests storedURL and then request for a new shortenedURL.
-        });
-        clearInterval(randomColorValue);
-        this.generateRandomColor(false);
-        console.log(err);
+    if (e.which == "13" || e.type == "click") {
+      const randomColorValue = setInterval(this.generateRandomColor, 10);
+      this.setState({
+        loading: true,
       });
+
+      const params = {
+        url: this.state.value,
+        user: this.state.userID,
+      };
+
+      await axios
+        .put("https://slink-staging.herokuapp.com/api/links", params)
+        .then((response) => {
+          clearInterval(randomColorValue);
+          this.generateRandomColor(false);
+          this.setState({
+            value: "",
+            error: false,
+            loading: false,
+            receivedShortenedLink: true,
+            displayStoredShortenedLink: false,
+            shortedLink: response.data.data.slink,
+          });
+        })
+        .catch((error) => {
+          if (error.response) {
+            this.setState({
+              errorDetails: error.response.data.error,
+            });
+          }
+          this.setState({
+            error: true,
+            loading: false,
+            displayStoredShortenedLink: false, // Hiding the storedURL details, Happens  When the user has first requests storedURL and then request for a new shortenedURL.
+          });
+          clearInterval(randomColorValue);
+          this.generateRandomColor(false);
+        });
+    }
   };
 
   fetchStoredLinks = async () => {
@@ -109,15 +114,13 @@ class App extends React.Component {
           storedLinks: [...response.data.data],
         });
       })
-      .catch((err) => {
+      .catch((error) => {
         this.setState({
           loading: false,
           error: true,
         });
-
         clearInterval(randomBackground);
         this.generateRandomColor(false);
-        console.log(err);
       });
   };
 
@@ -174,6 +177,7 @@ class App extends React.Component {
             type="text"
             value={this.state.value}
             onChange={this.updateValue}
+            onKeyPress={this.submitTheLink}
           ></input>
           <button
             className={this.state.value ? "enableInput" : "hideInput"}
