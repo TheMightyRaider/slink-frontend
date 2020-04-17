@@ -8,6 +8,7 @@ class App extends React.Component {
   state = {
     value: "",
     error: null,
+    errorDetails: "",
     loading: false,
     randomColor: null,
     receivedShortenedLink: false,
@@ -71,7 +72,12 @@ class App extends React.Component {
           shortedLink: [...response.data.data.slink],
         });
       })
-      .catch((err) => {
+      .catch((error) => {
+        if (error.response) {
+          this.setState({
+            errorDetails: error.response.data.error,
+          });
+        }
         this.setState({
           error: true,
           loading: false,
@@ -86,6 +92,7 @@ class App extends React.Component {
   fetchStoredLinks = async () => {
     const randomBackground = setInterval(this.generateRandomColor, 10);
     this.setState({
+      value: "",
       loading: true,
     });
     const params = {
@@ -107,6 +114,7 @@ class App extends React.Component {
           loading: false,
           error: true,
         });
+
         clearInterval(randomBackground);
         this.generateRandomColor(false);
         console.log(err);
@@ -129,11 +137,27 @@ class App extends React.Component {
             value={this.state.value}
             onChange={this.updateValue}
           ></input>
-
-          <button name="submit" onClick={this.submitTheLink}>
+          <button
+            className={this.state.value ? "enableInput" : "hideInput"}
+            name="submit"
+            onClick={this.submitTheLink}
+          >
             Submit
           </button>
         </div>
+        <br></br>
+        <br></br>
+        <br></br>
+        {this.state.displayStoredShortenedLink && !this.state.loading ? (
+          this.state.storedLinks.length > 0 ? (
+            <DisplayStoredLinks
+              links={this.state.storedLinks}
+              id={this.state.userID}
+            />
+          ) : (
+            <p class="inputBox">No history of ShortenedLinks</p>
+          )
+        ) : null}
         <div
           className={
             this.state.error ||
@@ -144,12 +168,19 @@ class App extends React.Component {
               : "inputBox"
           }
         >
+          <h1>SLINK!</h1>
           <input
+            placeholder="Enter your URL"
             type="text"
             value={this.state.value}
             onChange={this.updateValue}
-          ></input>{" "}
-          <button name="submit" onClick={this.submitTheLink}>
+          ></input>
+          <button
+            className={this.state.value ? "enableInput" : "hideInput"}
+            name="submit"
+            onClick={this.submitTheLink}
+            disabled={!this.state.value}
+          >
             Submit
           </button>
           <br></br>
@@ -159,10 +190,9 @@ class App extends React.Component {
             Click here
           </button>
         </div>
-        <br></br>
-        <br></br>
+
         <div className={this.state.error ? "displayError" : "hideInput"}>
-          <h3>Sorry Bruh, An Error has occurred :(</h3>
+          <h3>Sorry Bruh, {this.state.errorDetails} :(</h3>
           <button
             name="tryAgain"
             onClick={() => {
@@ -179,15 +209,6 @@ class App extends React.Component {
             updateReceivedLink={() => {
               this.setState({ error: false, receivedShortenedLink: false });
             }}
-          />
-        ) : null}
-
-        {this.state.storedLinks.length > 0 &&
-        this.state.displayStoredShortenedLink &&
-        !this.state.loading ? (
-          <DisplayStoredLinks
-            links={this.state.storedLinks}
-            id={this.state.userID}
           />
         ) : null}
       </div>
