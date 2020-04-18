@@ -15,13 +15,40 @@ class App extends React.Component {
     resultLink: "",
   };
 
+  updateResult = (link) => {
+    this.setState({
+      resultLink: link,
+      mode: "result",
+    });
+  };
+
+  createMode = () => {
+    this.setState({
+      mode: "create",
+    });
+  };
+
+  renderCard() {
+    switch (this.state.mode) {
+      case "create":
+        return (
+          <CreateCard
+            user={this.state.userID}
+            updateResult={this.updateResult}
+          />
+        );
+      case "result":
+        return (
+          <DisplayShortenedLink
+            link={this.state.resultLink}
+            updateReceivedLink={this.createMode}
+          />
+        );
+    }
+  }
+
   render() {
-    const { mode } = this.state;
-    return (
-      <div>
-        {mode === "create" ? <CreateCard user={this.state.userID} /> : null}
-      </div>
-    );
+    return <div>{this.renderCard()}</div>;
   }
 }
 

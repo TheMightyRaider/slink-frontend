@@ -24,26 +24,22 @@ class CreateCard extends React.Component {
     await api
       .createLink({ url: this.state.value, user: this.props.user })
       .then((response) => {
-        this.setState({
-          value: "",
-          shortedLink: response.data.slink,
-        });
+        this.props.updateResult(response.data.slink);
       })
       .catch((e) => {
-        if (e) {
-          this.setState({
-            error: e.data.error,
-          });
-        } else {
-          this.setState({
-            error: "Some Error occured.",
-          });
-        }
-      });
+        let errMsg = "";
 
-    this.setState({
-      loading: false,
-    });
+        if (e) {
+          errMsg = e.data.error;
+        } else {
+          errMsg = "Some error occured.";
+        }
+
+        this.setState({
+          error: errMsg,
+          loading: false,
+        });
+      });
   };
 
   updateValue = (e) => {
