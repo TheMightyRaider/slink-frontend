@@ -77,14 +77,14 @@ class App extends React.Component {
       loading: true,
     });
 
-    api
+    await api
       .getLinks({
         user: this.state.userID,
       })
-      .then((data) => {
+      .then((response) => {
         this.setState({
           displayStoredShortenedLink: true,
-          storedLinks: [...response.data.data],
+          storedLinks: [...response.data],
         });
       })
       .catch((e) => {

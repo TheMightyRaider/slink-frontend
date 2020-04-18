@@ -14,9 +14,9 @@ export function createLink({ url, user }) {
     .catch((error) => error.response);
 }
 
-export function getLinks({ user }) {
+export function getLinks(params) {
   return instance
-    .get("/api/links", { user })
+    .get("/api/links", { params })
     .then((response) => response.data)
     .catch((error) => error.response);
 }
