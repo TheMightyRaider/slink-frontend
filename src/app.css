@@ -1,3 +1,79 @@
 body {
-  background-color: grey;
+  height: 100%;
+  /* background-color: snow; */
+  background-image: url(https://www.wallpaperflare.com/static/796/143/733/colorful-minimalism-assorted-color-wallpaper.jpg);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+  font-family: "monospace";
+}
+
+.hideInput {
+  display: none;
+}
+
+.enableInput {
+  display: block;
+  margin: 2% auto;
+}
+
+.inputBox h1 {
+  text-align: center;
+}
+
+.inputBox input {
+  width: 100%;
+}
+
+.inputBox {
+  background-color: whitesmoke;
+  border-style: solid;
+  padding: 20px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin-right: -50%;
+  transform: translate(-50%, -50%);
+}
+
+.afterStoredLinkisDisplayed {
+  border-style: solid;
+  background-color: whitesmoke;
+  padding: 20px;
+  position: absolute;
+  top: 10%;
+  left: 50%;
+  margin-right: -50%;
+  transform: translate(-50%, -50%);
+}
+
+.displayError {
+  background-color: whitesmoke;
+  border-style: solid;
+  padding: 20px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin-right: -50%;
+  transform: translate(-50%, -50%);
+}
+
+table {
+  border-collapse: collapse;
+}
+
+table,
+th,
+td {
+  margin-top: 7%;
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 2%;
+  border: 1px solid black;
+  padding: 10px;
+  background-color: whitesmoke;
+}
+
+span {
+  font-size: 16px;
 }
