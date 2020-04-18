@@ -1,12 +1,9 @@
 import React from "react";
 import DisplayShortenedLink from "./Components/DisplayShortenedLink";
 import DisplayStoredLinks from "./Components/DisplayStoredLinks";
+import Loader from "./Components/Loader";
 
-import {
-  generateRandomColor,
-  clearBackgroundColor,
-  getUserID,
-} from "./helpers/utils";
+import { getUserID } from "./helpers/utils";
 import * as api from "./helpers/api";
 import "./app.css";
 
@@ -16,14 +13,11 @@ class App extends React.Component {
     error: null,
     errorDetails: "",
     loading: false,
-    randomColor: null,
     receivedShortenedLink: false,
     displayStoredShortenedLink: false,
     shortedLink: "",
     storedLinks: [],
   };
-
-  intervalID = null;
 
   componentDidMount() {
     this.setState({
@@ -37,12 +31,10 @@ class App extends React.Component {
     });
   };
 
-  resetAfterLoading() {
+  resetLoading() {
     this.setState({
       loading: false,
     });
-    clearInterval(this.intervalID);
-    clearBackgroundColor();
   }
 
   submitTheLink = async (e) => {
@@ -52,17 +44,16 @@ class App extends React.Component {
       return;
     }
 
-    this.intervalID = setInterval(generateRandomColor, 10);
     this.setState({
       loading: true,
     });
 
     await api
       .createLink({ url: this.state.value, user: this.state.userID })
-      .then((data) => {
+      .then((response) => {
         this.setState({
           value: "",
-          shortedLink: data.slink,
+          shortedLink: response.data.slink,
         });
       })
       .catch((e) => {
@@ -77,16 +68,15 @@ class App extends React.Component {
         });
       });
 
-    this.resetAfterLoading();
+    this.resetLoading();
   };
 
   fetchStoredLinks = async () => {
-    this.intervalID = setInterval(generateRandomColor, 10);
-
     this.setState({
       value: "",
       loading: true,
     });
+
     api
       .getLinks({
         user: this.state.userID,
@@ -103,10 +93,14 @@ class App extends React.Component {
         });
       });
 
-    this.resetAfterLoading();
+    this.resetLoading();
   };
 
   render() {
+    if (this.state.loading) {
+      return <Loader />;
+    }
+
     return (
       <div>
         <div
