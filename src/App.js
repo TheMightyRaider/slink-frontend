@@ -1,47 +1,27 @@
 import React from "react";
-import axios from "axios";
 import DisplayShortenedLink from "./Components/DisplayShortenedLink";
 import DisplayStoredLinks from "./Components/DisplayStoredLinks";
+import Loader from "./Components/Loader";
+
+import { getUserID } from "./helpers/utils";
+import * as api from "./helpers/api";
 import "./app.css";
 
-/* 
-
-  Add keypress validation submit !
-
-*/
 class App extends React.Component {
   state = {
     value: "",
     error: null,
     errorDetails: "",
     loading: false,
-    randomColor: null,
     receivedShortenedLink: false,
     displayStoredShortenedLink: false,
     shortedLink: "",
     storedLinks: [],
   };
 
-  generateRandomColor() {
-    const randomColor = Math.floor(Math.random() * 16777215).toString(16);
-    document.body.style.backgroundColor = "#" + randomColor;
-    document.body.style.backgroundImage = "none";
-  }
-
-  clearBackgroundColor() {
-    document.body.style.backgroundColor = "";
-    document.body.style.backgroundImage = "";
-  }
-
   componentDidMount() {
-    let newUserId;
-    let userID = parseInt(localStorage.getItem("ID"));
-    if (!userID) {
-      newUserId = Math.floor(new Date().getTime() / 1000);
-      localStorage.setItem("ID", newUserId);
-    }
     this.setState({
-      userID: newUserId || userID,
+      userID: getUserID(),
     });
   }
 
@@ -51,80 +31,76 @@ class App extends React.Component {
     });
   };
 
+  resetLoading() {
+    this.setState({
+      loading: false,
+    });
+  }
+
   submitTheLink = async (e) => {
-    if ((e.which == "13" || e.type == "click") && this.state.value.length > 0) {
-      const randomColorValue = setInterval(this.generateRandomColor, 10);
-      this.setState({
-        loading: true,
+    if (
+      !((e.which == "13" || e.type == "click") && this.state.value.length > 0)
+    ) {
+      return;
+    }
+
+    this.setState({
+      loading: true,
+    });
+
+    await api
+      .createLink({ url: this.state.value, user: this.state.userID })
+      .then((response) => {
+        this.setState({
+          value: "",
+          shortedLink: response.data.slink,
+        });
+      })
+      .catch((e) => {
+        if (e) {
+          this.setState({
+            errorDetails: e.data.error,
+          });
+        }
+        this.setState({
+          error: true,
+          shortedLink: "",
+        });
       });
 
-      const params = {
-        url: this.state.value,
-        user: this.state.userID,
-      };
-
-      await axios
-        .put("https://slink-staging.herokuapp.com/api/links", params)
-        .then((response) => {
-          clearInterval(randomColorValue);
-          this.clearBackgroundColor();
-          this.setState({
-            value: "",
-            error: false,
-            loading: false,
-            receivedShortenedLink: true,
-            displayStoredShortenedLink: false,
-            shortedLink: response.data.data.slink,
-          });
-        })
-        .catch((error) => {
-          if (error.response) {
-            this.setState({
-              errorDetails: error.response.data.error,
-            });
-          }
-          this.setState({
-            error: true,
-            loading: false,
-            displayStoredShortenedLink: false, // Hiding the storedURL details, Happens  When the user has first requests storedURL and then request for a new shortenedURL.
-          });
-          clearInterval(randomColorValue);
-          this.clearBackgroundColor();
-        });
-    }
+    this.resetLoading();
   };
 
   fetchStoredLinks = async () => {
-    const randomBackground = setInterval(this.generateRandomColor, 10);
     this.setState({
       value: "",
       loading: true,
     });
-    const params = {
-      user: this.state.userID,
-    };
-    await axios
-      .get("https://slink-staging.herokuapp.com/api/links", { params })
+
+    await api
+      .getLinks({
+        user: this.state.userID,
+      })
       .then((response) => {
-        clearInterval(randomBackground);
-        this.clearBackgroundColor();
         this.setState({
-          loading: false,
           displayStoredShortenedLink: true,
-          storedLinks: [...response.data.data],
+          storedLinks: [...response.data],
         });
       })
-      .catch((error) => {
+      .catch((e) => {
         this.setState({
-          loading: false,
           error: true,
         });
-        clearInterval(randomBackground);
-        this.clearBackgroundColor();
       });
+
+    this.resetLoading();
   };
 
   render() {
+    if (this.state.loading) {
+      return <Loader />;
+    }
+
     return (
       <div>
         <div
@@ -207,11 +183,11 @@ class App extends React.Component {
           </button>
         </div>
 
-        {this.state.receivedShortenedLink ? (
+        {this.state.shortedLink ? (
           <DisplayShortenedLink
             link={this.state.shortedLink}
             updateReceivedLink={() => {
-              this.setState({ error: false, receivedShortenedLink: false });
+              this.setState({ error: false, shortedLink: "" });
             }}
           />
         ) : null}
