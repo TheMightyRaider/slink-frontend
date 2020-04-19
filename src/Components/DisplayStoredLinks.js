@@ -6,6 +6,16 @@ class DisplayStoredLinks extends React.Component {
   render() {
     return (
       <div>
+        <div className="afterStoredLinkIsDisplayed">
+          <h3>Shorten a New Link?</h3>
+          <button
+            name="submit"
+            className="enableInput"
+            onClick={this.props.updateMode}
+          >
+            Yeah !
+          </button>
+        </div>
         <table>
           <tbody>
             <tr>
@@ -14,11 +24,7 @@ class DisplayStoredLinks extends React.Component {
             </tr>
             {this.props.links.map((item, index) => {
               return (
-                <Link
-                  key={this.props.id + index}
-                  hash={item.hash}
-                  originalUrl={item.url}
-                />
+                <Link key={index} hash={item.hash} originalUrl={item.url} />
               );
             })}
           </tbody>

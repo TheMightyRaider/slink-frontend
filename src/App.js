@@ -1,7 +1,7 @@
 import React from "react";
 import DisplayShortenedLink from "./Components/DisplayShortenedLink";
 import CreateCard from "./Components/CreateCard";
-import Loader from "./Components/Loader";
+import DisplayStoredLink from "./Components/DisplayStoredLinks";
 
 import { getUserID } from "./helpers/utils";
 import "./app.css";
@@ -13,6 +13,7 @@ class App extends React.Component {
     mode: "create",
     userID: getUserID(),
     resultLink: "",
+    storedLinks: [],
   };
 
   updateResult = (link) => {
@@ -28,20 +29,36 @@ class App extends React.Component {
     });
   };
 
+  updateStoredLinks = (links) => {
+    this.setState({
+      mode: "list",
+      storedLinks: [...links],
+    });
+  };
+
   renderCard() {
+    const { createMode, updateResult, updateStoredLinks } = this;
     switch (this.state.mode) {
       case "create":
         return (
           <CreateCard
             user={this.state.userID}
-            updateResult={this.updateResult}
+            updateResult={updateResult}
+            updateStoredLinks={updateStoredLinks}
           />
         );
       case "result":
         return (
           <DisplayShortenedLink
             link={this.state.resultLink}
-            updateReceivedLink={this.createMode}
+            updateReceivedLink={createMode}
+          />
+        );
+      case "list":
+        return (
+          <DisplayStoredLink
+            links={this.state.storedLinks}
+            updateMode={createMode}
           />
         );
     }

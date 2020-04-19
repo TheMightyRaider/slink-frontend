@@ -28,9 +28,8 @@ class CreateCard extends React.Component {
       })
       .catch((e) => {
         let errMsg = "";
-
-        if (e) {
-          errMsg = e.data.error;
+        if (e.response) {
+          errMsg = e.response.data.error;
         } else {
           errMsg = "Some error occured.";
         }
@@ -48,16 +47,48 @@ class CreateCard extends React.Component {
     });
   };
 
+  fetchStoredLinks = async () => {
+    this.setState({
+      loading: true,
+    });
+
+    await api
+      .getLinks({
+        user: this.props.user,
+      })
+      .then((response) => {
+        this.props.updateStoredLinks(response.data);
+      })
+      .catch((e) => {
+        let errMsg;
+        if (e.response) {
+          errMsg = e.response.error;
+        } else {
+          errMsg = "Some error occured.";
+        }
+        this.setState({
+          error: errMsg,
+          loading: false,
+        });
+      });
+  };
+
+  removeError = () => {
+    this.setState({
+      error: false,
+    });
+  };
+
   render() {
-    const { value, loading } = this.state;
-    const { updateValue, submitTheLink } = this;
+    const { value, loading, error } = this.state;
+    const { updateValue, submitTheLink, fetchStoredLinks, removeError } = this;
 
     if (loading) {
       return <Loader />;
     }
 
     return (
-      <div className="inputBox">
+      <div className="inputBox" onClick={removeError}>
         <h1>SLINK!</h1>
         <input
           placeholder="Enter your URL"
@@ -66,6 +97,9 @@ class CreateCard extends React.Component {
           onChange={updateValue}
           onKeyPress={submitTheLink}
         ></input>
+
+        {error ? <div className="displayError">{error}</div> : null}
+
         <button
           className={value ? "enableInput" : "hideInput"}
           name="submit"
@@ -76,7 +110,7 @@ class CreateCard extends React.Component {
         <br></br>
         <br></br>
         <span>Want your previous shortened Links? </span>
-        <button name="getLinks" onClick={() => null}>
+        <button name="getLinks" onClick={fetchStoredLinks}>
           Click here
         </button>
       </div>
