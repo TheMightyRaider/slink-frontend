@@ -8,15 +8,11 @@ const instance = axios.create({
 
 export function createLink({ url, user }) {
   const params = { url, user };
-  return instance
-    .put("/api/links", params)
-    .then((response) => response.data)
-    .catch((error) => error.response);
+  return instance.put("/api/links", params).then((response) => response.data);
 }
 
 export function getLinks(params) {
   return instance
     .get("/api/links", { params })
-    .then((response) => response.data)
-    .catch((error) => error.response);
+    .then((response) => response.data);
 }
